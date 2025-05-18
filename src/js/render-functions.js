@@ -22,9 +22,9 @@ const lightbox = new SimpleLightbox('#gallery ul li a', {
   
 export function createGallery(images) {
   const markup = images
-    .map(({ previewURL, largeImageURL, tags, comments, downloads, likes, views }) =>
+    .map(({ webformatURL, largeImageURL, tags, comments, downloads, likes, views }) =>
       `<li class="gallery-link"><a class="gallery-item" href="${largeImageURL}">
-    <img class="gallery-image" src="${previewURL}" alt="${tags}"/></a>
+    <img class="gallery-image" src="${webformatURL}" alt="${tags}"/></a>
     <div class="info">
           <div class="info-list">
             <h4 class="info-title">Likes</h4>
@@ -80,6 +80,14 @@ export function scrollByCardHeight() {
   });
 }
 
+export function updateLoadMoreVisibility(page, totalPages) {
+    if (page <= totalPages) {
+        showLoadMoreButton();
+    } else {
+        hideLoadMoreButton();
+    }
+}
+
 export const optionIzi = {
     position: "topRight",
     messageColor: '#fff',
@@ -88,3 +96,4 @@ export const optionIzi = {
     backgroundColor: " #EF4040",
     iconColor: '#fff'
 }
+

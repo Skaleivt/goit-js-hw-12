@@ -5,18 +5,19 @@ const input = document.querySelector('input');
 const button = document.querySelector('.form button');
 
 import { getImagesByQuery } from './js/pixabay-api';
-import { createGallery, clearGallery, showLoader, hideLoader, showLoadMoreButton, hideLoadMoreButton, scrollByCardHeight, buttonLoader, optionIzi } from './js/render-functions'
+import { createGallery, clearGallery, showLoader, hideLoader, showLoadMoreButton, hideLoadMoreButton, scrollByCardHeight, buttonLoader, updateLoadMoreVisibility, optionIzi } from './js/render-functions'
 
-let query = ' ';
+let query = '';
 let page = 1;
-let totalHits = ' ';
-let totalPages = ' ';
+let totalHits = 0;
+let totalPages = 0;
 const perPage = 15;
 
 button.addEventListener('click', async (event) => {
     event.preventDefault();
     
     query = input.value.trim();
+    page = 1;
 
     if (!query) {
         iziToast.warning({
@@ -26,8 +27,9 @@ button.addEventListener('click', async (event) => {
         return;
     }
     clearGallery();
-    showLoader();
     hideLoadMoreButton();
+    showLoader();
+
     
     try {
         const data = await getImagesByQuery(query, page, perPage);
@@ -39,15 +41,12 @@ button.addEventListener('click', async (event) => {
                     ...optionIzi
                 })
                 hideLoader();
-            } else {
-                createGallery(data.hits)
-                page += 1;
-                if (page > totalPages) {
-                    return
-                } else {
-                    showLoadMoreButton();
-                }
-            }
+                return;
+            } 
+            createGallery(data.hits)
+            page += 1;
+            updateLoadMoreVisibility(page, totalPages);
+
         } catch (err) {
             iziToast.error({
                 message: "Error",
@@ -62,24 +61,24 @@ button.addEventListener('click', async (event) => {
 
 buttonLoader.addEventListener('click', async (event) => {
     event.preventDefault();
-    hideLoadMoreButton();
-    showLoader();   
+       
     if (page > totalPages) {
-        hideLoader();
         iziToast.info({
             message: "We're sorry, there are no more posts to load",
             ...optionIzi
         }); 
-    return        
+        hideLoadMoreButton();
+        return        
     }
+    hideLoadMoreButton();
+    showLoader();
 
     try {
         const data = await getImagesByQuery(query, page, perPage);
         createGallery(data.hits);
         page += 1;
-        hideLoader();
-        showLoadMoreButton();
-        scrollByCardHeight();        
+        scrollByCardHeight(); 
+        updateLoadMoreVisibility(page, totalPages);
     } catch(err) {
             iziToast.error({
                 message: "Error",
